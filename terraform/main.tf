@@ -94,7 +94,7 @@ resource "aws_instance" "web" {
               dnf install -y nginx
               systemctl enable nginx
               systemctl start nginx
-              echo "<h1>Deployed via GitHub Actions OIDC (Alamgir00)</h1>" > /usr/share/nginx/html/index.html
+              echo "<h1>Deployed via GitHub Actions OIDC (Alamgir00).   This is demo Aws Infra Cicd PIPELINE.</h1>" > /usr/share/nginx/html/index.html
               USERDATA
 
   tags = { Name = "alamgir-web-server" }
