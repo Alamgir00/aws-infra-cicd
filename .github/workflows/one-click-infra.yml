@@ -34,10 +34,10 @@ jobs:
       - name: Configure AWS Credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          audience: sts.amazonaws.com
-          aws-region: ${{ github.event.inputs.aws_region }}
-          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
-          role-session-name: GHA-Alamgir-${{ github.run_id }}
+         audience: sts.amazonaws.com
+         aws-region: ${{ github.event.inputs.aws_region }}
+         role-to-assume: ${{ vars.AWS_ROLE_ARN || 'arn:aws:iam::650694421089:role/github-actions-infra-deployer' }}
+         role-session-name: GHA-Alamgir-${{ github.run_id }}
 
       - name: Verify STS Caller Identity
         run: aws sts get-caller-identity
