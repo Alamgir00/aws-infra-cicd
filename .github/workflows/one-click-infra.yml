@@ -31,16 +31,27 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      # Debug Step: Extract and print the exact claims GitHub is sending to AWS
+      - name: Inspect GitHub OIDC Token Claims
+        run: |
+          echo "=== Fetching OIDC Token from GitHub Token Service ==="
+          RAW_TOKEN=$(curl -s -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=sts.amazonaws.com" | jq -r '.value')
+          
+          echo "=== Decoded Token Payload (Claims sent to AWS STS) ==="
+          echo "$RAW_TOKEN" | jq -R 'split(".") | .[1] | @base64d | fromjson'
+
       - name: Configure AWS Credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
+          audience: sts.amazonaws.com
           aws-region: ${{ github.event.inputs.aws_region }}
           role-to-assume: arn:aws:iam::650694421089:role/github-actions-infra-deployer
           role-session-name: GHA-Alamgir-${{ github.run_id }}
 
       - name: Verify STS Caller Identity
         run: |
-          echo "Authenticated Identity:"
+          echo "Authenticated to AWS as:"
           aws sts get-caller-identity
 
       - name: Setup Terraform
