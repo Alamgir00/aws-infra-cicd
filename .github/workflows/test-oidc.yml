@@ -1,0 +1,37 @@
+name: "Quick OIDC Auth Test"
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  test-aws-oidc:
+    name: "Validate OIDC Handshake"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          audience: sts.amazonaws.com
+          aws-region: us-east-1
+          role-to-assume: arn:aws:iam::650694421089:role/github-actions-infra-deployer
+          role-session-name: GHA-Test-Session-${{ github.run_id }}
+
+      - name: Test STS Caller Identity
+        run: |
+          echo "==========================================="
+          echo "✅ STS AUTHENTICATION SUCCESSFUL!"
+          echo "==========================================="
+          aws sts get-caller-identity
+
+      - name: Test Read Access (List VPCs)
+        run: |
+          echo "Listing Default / Existing VPCs in us-east-1:"
+          aws ec2 describe-vpcs --region us-east-1 --query "Vpcs[*].[VpcId,CidrBlock,State]" --output table
